@@ -1,7 +1,8 @@
 use clap::Parser;
 pub mod enums;
-pub mod server;
 pub mod request;
+pub mod response;
+pub mod server;
 
 #[derive(Parser)]
 struct Cli {
