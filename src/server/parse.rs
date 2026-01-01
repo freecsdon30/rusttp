@@ -33,9 +33,7 @@ pub fn handle_connections(stream: TcpStream) {
 
     if status.is_complete() {
         if let (Some(v), Some(m), Some(p)) = (req.version, req.method, req.path) {
-            println!("VERSION: {:?}", v);
-            println!("METHOD: {:?}", m);
-            println!("PATH: {:?}", p);
+            println!("HTTP:{} {} {}", v, m, p);
             println!("HEADERS: {:#?}", headers_map);
         }
     }
