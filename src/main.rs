@@ -1,5 +1,6 @@
 use clap::Parser;
 use std::net::TcpListener;
+mod server;
 
 #[derive(Parser)]
 struct Cli {
@@ -14,10 +15,23 @@ fn main() {
     let host = args.host;
     let port = args.port;
 
-    let listener = TcpListener::bind(format!("{}:{}", host, port.to_string())).unwrap();
+    let listener = match TcpListener::bind(format!("{}:{}", host, port.to_string())) {
+        Ok(l) => {
+            println!("Server started successfully for host: {}:{}", host, port);
+            l
+        }
+        Err(err) => {
+            println!("Error starting server: {}", err);
+            return;
+        }
+    };
 
     for stream in listener.incoming() {
-        let stream = stream.unwrap();
-        println!("connection established..!!: {:?}", stream);
+        match stream {
+            Ok(s) => {
+                server::parse::handle_connections(s);
+            }
+            Err(e) => eprintln!("Connection failed: {}", e),
+        }
     }
 }
