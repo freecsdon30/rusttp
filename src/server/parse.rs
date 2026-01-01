@@ -1,8 +1,11 @@
 use std::{
-    collections::HashMap,
     io::{BufRead, BufReader},
     net::TcpStream,
+    str::FromStr,
 };
+
+use crate::enums::{http_version::HttpVersion, method::RequestMethod};
+use crate::request::request;
 
 pub fn handle_connections(stream: TcpStream) {
     let buf_reader = BufReader::new(&stream);
@@ -16,25 +19,30 @@ pub fn handle_connections(stream: TcpStream) {
         + "\r\n\r\n";
 
     let mut headers = [httparse::EMPTY_HEADER; 32];
+
     let mut req = httparse::Request::new(&mut headers);
 
     let status = req.parse(http_request.as_bytes()).unwrap_or_else(|e| {
         eprintln!("error : {}", e);
         panic!("request parsing error");
     });
-
-    let mut headers_map = HashMap::new();
-
-    for header in req.headers.iter().filter(|h| !h.name.is_empty()) {
-        let name = header.name.to_string();
-        let value = String::from_utf8_lossy(header.value).to_string();
-        headers_map.insert(name, value);
-    }
-
     if status.is_complete() {
         if let (Some(v), Some(m), Some(p)) = (req.version, req.method, req.path) {
-            println!("HTTP:{} {} {}", v, m, p);
-            println!("HEADERS: {:#?}", headers_map);
+            let headers_vec: Vec<httparse::Header> = req
+                .headers
+                .iter()
+                .filter(|h| !h.name.is_empty())
+                .map(|h| *h)
+                .collect();
+
+            let request = request::Request {
+                version: HttpVersion::try_from(v).expect("invalid or unsupported http version..!!"),
+                method: RequestMethod::from_str(m).expect("invalid or unsupported method..!!"),
+                path: p,
+                headers: headers_vec,
+                body: &[],
+            };
+            println!("REQUEST: {:#?}", request);
         }
     }
 }
