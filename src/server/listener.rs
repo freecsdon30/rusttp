@@ -3,7 +3,7 @@ use std::net::TcpListener;
 
 #[allow(dead_code)]
 pub fn listen(host: &str, port: &u16) {
-    let listener = match TcpListener::bind(format!("{}:{}", host, port.to_string())) {
+    let listener = match TcpListener::bind(format!("{host}:{port}")) {
         Ok(l) => {
             println!("Server started successfully for host: {}:{}", host, port);
             l
