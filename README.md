@@ -31,10 +31,10 @@
 
 ### Functionalities to add
 
-- [ ]  Acceptor/Listener  - function to bind to a socket
+- [x]  Acceptor/Listener  - function to bind to a socket
 - [ ]  Non blocking event loop - Reactor pattern 
 - [ ]  TLS termination - wrap raw streams in encryption layer 
-- [ ]  Request/Response structs - type that holds methods, URIs and status codes
+- [x]  Request/Response structs - type that holds methods, URIs and status codes
 - [ ]  HeaderMap: a header map that is efficient and supports lazy parsing 
 - [ ]  Streaming body: loading stream of bytes rather than loading whole body at once 
 - [ ]  Service Trait: defines a function taking request and returning future of response.
