@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::enums::{http_version::HttpVersion, method::RequestMethod};
-use crate::request::request;
+use crate::request::tcp_request;
 
 pub fn handle_connections(stream: TcpStream) {
     let buf_reader = BufReader::new(&stream);
@@ -26,23 +26,24 @@ pub fn handle_connections(stream: TcpStream) {
         eprintln!("error : {}", e);
         panic!("request parsing error");
     });
-    if status.is_complete() {
-        if let (Some(v), Some(m), Some(p)) = (req.version, req.method, req.path) {
-            let headers_vec: Vec<httparse::Header> = req
-                .headers
-                .iter()
-                .filter(|h| !h.name.is_empty())
-                .map(|h| *h)
-                .collect();
 
-            let request = request::Request {
-                version: HttpVersion::try_from(v).expect("invalid or unsupported http version..!!"),
-                method: RequestMethod::from_str(m).expect("invalid or unsupported method..!!"),
-                path: p,
-                headers: headers_vec,
-                body: &[],
-            };
-            println!("REQUEST: {:#?}", request);
-        }
+    if status.is_complete()
+        && let (Some(v), Some(m), Some(p)) = (req.version, req.method, req.path)
+    {
+        let headers_vec: Vec<httparse::Header> = req
+            .headers
+            .iter()
+            .filter(|h| !h.name.is_empty())
+            .copied()
+            .collect();
+
+        let request = tcp_request::Request {
+            version: HttpVersion::try_from(v).expect("invalid or unsupported http version..!!"),
+            method: RequestMethod::from_str(m).expect("invalid or unsupported method..!!"),
+            path: p,
+            headers: headers_vec,
+            body: &[],
+        };
+        println!("REQUEST: {:#?}", request);
     }
 }
